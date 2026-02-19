@@ -7,9 +7,7 @@
 
 > *A minimal, lightning-fast, and heavily customized Arch Linux environment tailored for Full-Stack Web Development.*
 
-<div align="center">
-  <img src="https://via.placeholder.com/800x450.png?text=Screenshot+Coming+Soon" alt="Desktop Screenshot">
-</div>
+![Desktop Screenshot](screenshot.png)
 
 ## 🚀 Overview
 Welcome to my personal dotfiles. This repository holds the exact blueprints for my daily-driver Linux environment. Built on top of **Arch Linux** and the **Hyprland** compositor, this setup is designed to be completely keyboard-driven, visually clean, and highly optimized for building web applications.
