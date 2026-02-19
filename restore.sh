@@ -2,6 +2,37 @@
 
 echo "Starting RBK's Arch & Hyprland Restore Script..."
 
+# ==========================================
+# 0. PACKAGE INSTALLATION
+# ==========================================
+echo "Starting system package installation..."
+
+# 1. Ensure system is up to date and has build tools
+sudo pacman -Syu --needed base-devel git curl wget --noconfirm
+
+# 2. Install yay (AUR Helper) if it doesn't exist
+if ! command -v yay &> /dev/null; then
+    echo "Installing yay..."
+    git clone https://aur.archlinux.org/yay.git /tmp/yay
+    cd /tmp/yay && makepkg -si --noconfirm
+    rm -rf /tmp/yay
+fi
+
+# 3. Core Desktop (Hyprland, Waybar, Foot Terminal)
+echo "Installing Core Desktop Environment..."
+yay -S --needed hyprland waybar foot wofi wl-clipboard fastfetch --noconfirm
+
+# 4. Web Development & Shell (MERN Stack + Zsh)
+echo "Installing Dev Tools..."
+yay -S --needed nodejs npm neovim zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions --noconfirm
+
+# 5. Media & Utilities
+echo "Installing Media and Utils..."
+yay -S --needed mpv qbittorrent ffmpeg github-cli --noconfirm
+
+echo "✅ Package installation complete!"
+echo "Proceeding to configuration restore..."
+
 # Define the exact path to our backup folder
 BACKUP_DIR="$HOME/.mydotfiles/com.ml4w.dotfiles.stable"
 
