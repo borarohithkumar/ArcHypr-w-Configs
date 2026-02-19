@@ -16,24 +16,25 @@ ln -sf "$BACKUP_DIR/.bash_profile" "$HOME/.bash_profile"
 ln -sfn "$BACKUP_DIR/ai_tool" "$HOME/ai_tool"
 
 # ==========================================
-# 2. SSH DIRECTORY
+# 2. SECRETS & SSH VAULT
 # ==========================================
-# We check if the backed-up SSH folder exists before trying to copy it
-if [ -d "$BACKUP_DIR/.ssh" ]; then
-    echo "Restoring SSH configuration..."
-    
-    # Copy the folder back to the home directory
-    cp -r "$BACKUP_DIR/.ssh" "$HOME/"
-    
-    # Strictly lock down permissions so SSH doesn't block the keys
+SECRETS_DIR="$HOME/.mysecrets"
+
+if [ -d "$SECRETS_DIR/.ssh" ]; then
+    echo "Restoring SSH configuration from private vault..."
+    cp -r "$SECRETS_DIR/.ssh" "$HOME/"
     chmod 700 "$HOME/.ssh"
     find "$HOME/.ssh" -type f -exec chmod 600 {} \;
     echo "SSH permissions secured."
 else
-    echo "No .ssh backup found, skipping."
+    echo "No private .ssh vault found in ~/.mysecrets, skipping."
 fi
 
-echo "Part 1 complete!"
+if [ -f "$SECRETS_DIR/.zsh_secrets" ]; then
+    echo "Restoring local API secrets..."
+    cp "$SECRETS_DIR/.zsh_secrets" "$HOME/.zsh_secrets"
+    echo "API secrets secured."
+fi
 
 # ==========================================
 # 3. .CONFIG DIRECTORY SYMLINKS
