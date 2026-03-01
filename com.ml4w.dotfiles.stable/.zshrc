@@ -104,6 +104,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+# Default Editor- neovim
+export EDITOR="nvim"
+export VISUAL="nvim"
+
 # 1. SAFETY NETS (Prevent accidental deletions)
 alias rm='rm -i'
 alias mv='mv -i'
