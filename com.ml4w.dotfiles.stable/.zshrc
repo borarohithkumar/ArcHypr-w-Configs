@@ -104,6 +104,49 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+# ================================
+# HISTORY CONFIGURATION
+# ================================
+
+# Location of history file
+HISTFILE=$HOME/.zsh_history
+
+# Number of commands kept in memory during a session
+HISTSIZE=25000
+
+# Number of commands saved to the history file
+SAVEHIST=50000
+
+
+# ---- History Behavior Options ----
+
+# Save timestamp with each command (useful for auditing/debugging)
+setopt EXTENDED_HISTORY
+
+# Share history across all open terminals
+# (commands executed in one terminal appear in others)
+setopt SHARE_HISTORY
+
+# Ignore duplicate commands typed consecutively
+setopt HIST_IGNORE_DUPS
+
+# Remove older duplicate entries when adding a new one
+setopt HIST_IGNORE_ALL_DUPS
+
+# Do not write duplicate entries to the history file
+setopt HIST_SAVE_NO_DUPS
+
+# When history is full, remove duplicates first
+setopt HIST_EXPIRE_DUPS_FIRST
+
+# Prevent accidental execution of history expansion (!)
+# Allows editing before execution
+setopt HIST_VERIFY
+
+# If a command starts with a space, do NOT store it in history
+# (useful for sensitive commands)
+setopt HIST_IGNORE_SPACE
+
 # Default Editor- neovim
 export EDITOR="nvim"
 export VISUAL="nvim"
