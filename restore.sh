@@ -18,17 +18,35 @@ if ! command -v yay &> /dev/null; then
     rm -rf /tmp/yay
 fi
 
-# 3. Core Desktop (Hyprland, Waybar, Foot Terminal)
+# 3. Core Desktop & Hyprland Ecosystem
 echo "Installing Core Desktop Environment..."
-yay -S --needed hyprland waybar foot wofi wl-clipboard fastfetch --noconfirm
+yay -S --needed hyprland waybar foot rofi-wayland swaync wl-clipboard fastfetch cliphist imagemagick jq grim slurp --noconfirm
+yay -S --needed hypridle hyprlock polkit-gnome --noconfirm
 
-# 4. Web Development & Shell (MERN Stack + Zsh)
+# 4. Wallpaper Engine (awww)
+echo "Installing wallpaper engine..."
+yay -S --needed awww waypaper python-imageio --noconfirm
+
+# --- THE ARCH LINUX BUG FIX ---
+# Create symlinks because Waypaper still looks for the old 'swww' command
+echo "Applying awww to swww symlink patches..."
+sudo ln -sf /usr/bin/awww /usr/bin/swww
+sudo ln -sf /usr/bin/awww-daemon /usr/bin/swww-daemon
+
+# 5. SDDM & Login Screen
+echo "Installing SDDM and themes..."
+yay -S --needed sddm sddm-theme-sugar-candy-git --noconfirm
+
+# 6. Web Development & Shell (MERN Stack + Zsh)
 echo "Installing Dev Tools..."
 yay -S --needed nodejs npm neovim zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions --noconfirm
 
-# 5. Media & Utilities
+# 7. Media & Utilities
 echo "Installing Media and Utils..."
 yay -S --needed mpv qbittorrent ffmpeg github-cli --noconfirm
+
+# Enable SDDM service to start on boot
+sudo systemctl enable sddm.service
 
 echo "✅ Package installation complete!"
 echo "Proceeding to configuration restore..."
