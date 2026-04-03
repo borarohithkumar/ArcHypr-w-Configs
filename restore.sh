@@ -39,11 +39,11 @@ yay -S --needed sddm sddm-theme-sugar-candy-git --noconfirm
 
 # 6. Web Development & Shell (MERN Stack + Zsh)
 echo "Installing Dev Tools..."
-yay -S --needed nodejs npm neovim zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions --noconfirm
+yay -S --needed nodejs-lts-krypton npm neovim zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions --noconfirm
 
 # 7. Media & Utilities
 echo "Installing Media and Utils..."
-yay -S --needed mpv qbittorrent ffmpeg github-cli --noconfirm
+yay -S --needed mpv transmission-cli tremc ffmpeg github-cli --noconfirm
 
 # Enable SDDM service to start on boot
 sudo systemctl enable sddm.service
@@ -63,6 +63,7 @@ echo "Restoring .zshrc and .bash_profile..."
 ln -sf "$BACKUP_DIR/.zshrc" "$HOME/.zshrc"
 ln -sf "$BACKUP_DIR/.bash_profile" "$HOME/.bash_profile"
 ln -sfn "$BACKUP_DIR/ai_tool" "$HOME/ai_tool"
+ln -sfn "$BACKUP_DIR/tg_tool" "$HOME/tg_tool"
 
 # ==========================================
 # 2. SECRETS & SSH VAULT
@@ -79,10 +80,14 @@ else
     echo "No private .ssh vault found in ~/.mysecrets, skipping."
 fi
 
-if [ -f "$SECRETS_DIR/.zsh_secrets" ]; then
-    echo "Restoring local API secrets..."
-    cp "$SECRETS_DIR/.zsh_secrets" "$HOME/.zsh_secrets"
-    echo "API secrets secured."
+if [ -f "$SECRETS_DIR/.ai_secrets" ]; then
+    echo "Restoring AI API secrets..."
+    cp "$SECRETS_DIR/.ai_secrets" "$HOME/.ai_secrets"
+fi
+
+if [ -f "$SECRETS_DIR/.tg_secrets" ]; then
+    echo "Restoring Telegram API secrets..."
+    cp "$SECRETS_DIR/.tg_secrets" "$HOME/.tg_secrets"
 fi
 
 # ==========================================
@@ -135,8 +140,19 @@ echo "Restoring system files (TLP & SDDM)... You will be prompted for your passw
 
 # TLP Power Management
 if [ -f "$BACKUP_DIR/tlp.conf" ]; then
-    echo "Linking TLP config..."
-    sudo ln -sf "$BACKUP_DIR/tlp.conf" /etc/tlp.conf
+    echo "Copying TLP config (avoiding symlink race conditions)..."
+    
+    # Use cp instead of ln to put a physical file on the root partition
+    sudo cp "$BACKUP_DIR/tlp.conf" /etc/tlp.conf
+    
+    # Automatically uncomment the enable flag
+    sudo sed -i 's/^#TLP_ENABLE=1/TLP_ENABLE=1/' /etc/tlp.conf
+    
+    # Ensure the systemd radio override is masked
+    sudo systemctl mask systemd-rfkill.service systemd-rfkill.socket
+    
+    # Enable the service to start on boot
+    sudo systemctl enable tlp.service
 fi
 
 # SDDM Login Screen & Sugar-Candy Theme
@@ -156,6 +172,14 @@ if [ -d "$BACKUP_DIR/sddm-backup" ]; then
     # 3. Restore custom background images (copies any jpg or png in the backup folder)
     sudo cp "$BACKUP_DIR/sddm-backup/"*.jpg /usr/share/sddm/themes/sugar-candy/ 2>/dev/null
     sudo cp "$BACKUP_DIR/sddm-backup/"*.png /usr/share/sddm/themes/sugar-candy/ 2>/dev/null
+fi
+
+# SSH Daemon Config
+if [ -f "$SECRETS_DIR/sshd_config" ]; then
+    echo "Restoring SSH Daemon configuration..."
+    sudo cp "$SECRETS_DIR/sshd_config" /etc/ssh/sshd_config
+    sudo chmod 644 /etc/ssh/sshd_config
+    sudo systemctl enable sshd.service
 fi
 
 echo "=========================================="

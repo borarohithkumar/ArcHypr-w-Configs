@@ -71,7 +71,7 @@ ENABLE_CORRECTION="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions zsh-autocomplete)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -115,8 +115,7 @@ HISTFILE=$HOME/.zsh_history
 HISTSIZE=25000
 
 # Number of commands saved to the history file
-SAVEHIST=50000
-
+SAVEHIST=100000
 
 # ---- History Behavior Options ----
 
@@ -165,7 +164,7 @@ prompt_context() {
 }
 
 # 3. RIGHT PROMPT TIMESTAMP
-RPROMPT='%F{yellow}[%T]%f'
+RPROMPT="%{$fg[yellow]%}[%D{%L:%M:%S}] %{$reset_color%}"
 
 # 4. AI TOOL FUNCTION
 ask() {
@@ -180,9 +179,17 @@ ask() {
     fi
 }
 
-# Load local secrets if the file exists
-if [ -f ~/.zsh_secrets ]; then
-    source ~/.zsh_secrets
+alias tgul='python ~/tg_tool/tg.py up'
+alias tgdl='python ~/tg_tool/tg.py dl'
+alias tgls='python ~/tg_tool/tg.py ls'
+
+# Load local secrets if the files exist
+if [ -f ~/.ai_secrets ]; then
+    source ~/.ai_secrets
+fi
+
+if [ -f ~/.tg_secrets ]; then
+    source ~/.tg_secrets
 fi
 
 # Custom dotfiles sync shortcut
@@ -205,3 +212,4 @@ function sync-dotfiles() {
     
     echo "✅ Done! Dotfiles secured."
 }
+export PATH="$HOME/.local/bin:$PATH"
