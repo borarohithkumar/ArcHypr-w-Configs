@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: termind-deployment
+spec:
+  replicas: 2 # THE MAGIC: Run 2 identical containers at the same time!
+  selector:
+    matchLabels:
+      app: termind
+  template:
+    metadata:
+      labels:
+        app: termind
+    spec:
+      containers:
+      - name: termind-api
+        image: borarohithkumar/termind-api:v2.0 # Pulls your exact brain from Docker Hub
+        ports:
+        - containerPort: 8000

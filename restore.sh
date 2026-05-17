@@ -1,14 +1,32 @@
 #!/bin/bash
 
-echo "Starting RBK's Arch & Hyprland Restore Script..."
+echo "Starting RBK's Arch, Hyprland, MERN & CloudOps+DevOps Restore Script..."
 
 # ==========================================
-# 0. PACKAGE INSTALLATION
+# 0. PRE-FLIGHT & REPOSITORY CLONE
+# ==========================================
+# Ensure git is installed first
+sudo pacman -Syu --needed git --noconfirm
+
+REPO_URL="https://github.com/borarohithkumar/archypr-w-configs.git"
+REPO_DIR="$HOME/.mydotfiles"
+BACKUP_DIR="$REPO_DIR/com.ml4w.dotfiles.stable"
+
+if [ ! -d "$REPO_DIR" ]; then
+    echo "Cloning backup repository..."
+    git clone "$REPO_URL" "$REPO_DIR"
+else
+    echo "Backup repository already exists at $REPO_DIR. Pulling latest changes..."
+    cd "$REPO_DIR" && git pull && cd "$HOME"
+fi
+
+# ==========================================
+# 1. PACKAGE INSTALLATION
 # ==========================================
 echo "Starting system package installation..."
 
-# 1. Ensure system is up to date and has build tools
-sudo pacman -Syu --needed base-devel git curl wget --noconfirm
+# 1. Ensure system has build tools
+sudo pacman -S --needed base-devel curl wget --noconfirm
 
 # 2. Install yay (AUR Helper) if it doesn't exist
 if ! command -v yay &> /dev/null; then
@@ -41,7 +59,28 @@ yay -S --needed sddm sddm-theme-sugar-candy-git --noconfirm
 echo "Installing Dev Tools..."
 yay -S --needed nodejs-lts-krypton npm neovim zsh zsh-autosuggestions zsh-syntax-highlighting zsh-completions --noconfirm
 
-# 7. Media & Utilities
+# 7. CloudOps & DevOps Ecosystem
+echo "Installing CloudOps & DevOps Tools..."
+yay -S --needed \
+    docker \
+    docker-compose \
+    aws-cli-v2 \
+    kubectl \
+    minikube \
+    terraform \
+    prometheus \
+    grafana \
+    nginx \
+    certbot \
+    certbot-nginx \
+    --noconfirm
+
+# Post-install: Setup Docker permissions & enable services
+sudo systemctl enable docker.service
+sudo systemctl enable nginx.service
+sudo usermod -aG docker $USER
+
+# 8. Media & Utilities
 echo "Installing Media and Utils..."
 yay -S --needed mpv transmission-cli tremc ffmpeg github-cli --noconfirm
 
@@ -51,11 +90,8 @@ sudo systemctl enable sddm.service
 echo "✅ Package installation complete!"
 echo "Proceeding to configuration restore..."
 
-# Define the exact path to our backup folder
-BACKUP_DIR="$HOME/.mydotfiles/com.ml4w.dotfiles.stable"
-
 # ==========================================
-# 1. HOME DIRECTORY FILES
+# 2. HOME DIRECTORY FILES
 # ==========================================
 echo "Restoring .zshrc and .bash_profile..."
 
@@ -65,8 +101,17 @@ ln -sf "$BACKUP_DIR/.bash_profile" "$HOME/.bash_profile"
 ln -sfn "$BACKUP_DIR/ai_tool" "$HOME/ai_tool"
 ln -sfn "$BACKUP_DIR/tg_tool" "$HOME/tg_tool"
 
+# CloudOps Project Folders
+echo "Restoring CloudOps & DevOps project folders..."
+CLOUDOPS_DIR="$BACKUP_DIR/CloudOps+DevOps"
+mkdir -p "$CLOUDOPS_DIR" # Ensure it exists so symlinks don't break if repo is empty
+
+ln -sfn "$CLOUDOPS_DIR/termind-api-infra" "$HOME/termind-api-infra"
+ln -sfn "$CLOUDOPS_DIR/observability" "$HOME/observability"
+ln -sfn "$CLOUDOPS_DIR/kubernetes" "$HOME/kubernetes"
+
 # ==========================================
-# 2. SECRETS & SSH VAULT
+# 3. SECRETS & SSH VAULT
 # ==========================================
 SECRETS_DIR="$HOME/.mysecrets"
 
@@ -91,7 +136,7 @@ if [ -f "$SECRETS_DIR/.tg_secrets" ]; then
 fi
 
 # ==========================================
-# 3. .CONFIG DIRECTORY SYMLINKS
+# 4. .CONFIG DIRECTORY SYMLINKS
 # ==========================================
 echo "Restoring ~/.config symlinks..."
 
@@ -100,24 +145,24 @@ mkdir -p "$HOME/.config"
 
 # Loop through every single file and folder in our backup .config
 for config_item in "$BACKUP_DIR/.config/"*; do
-    # Get just the name of the folder/file (e.g., 'waybar', 'mpv', 'mimeapps.list')
+	# Get just the name of the folder/file (e.g., 'waybar', 'mpv', 'mimeapps.list')
     item_name=$(basename "$config_item")
     
-    # Skip the 'Code' folder because we handle it carefully below
+	# Skip the 'Code' folder because we handle it carefully below
     if [ "$item_name" = "Code" ]; then
         continue
     fi
     
-    # Create the symlink (force overwrite if a default folder already exists)
+	# Create the symlink (force overwrite if a default folder already exists)
     ln -sfn "$config_item" "$HOME/.config/$item_name"
 done
 
 echo "Main .config apps successfully linked!"
 
 # ==========================================
-# 4. VS CODE CONFIGURATION
+# 5. VS CODE CONFIGURATION
 # ==========================================
-echo "Restoring VS Code settings for MERN stack..."
+echo "Restoring VS Code settings..."
 
 # Ensure the exact VS Code User directory exists on the new machine
 mkdir -p "$HOME/.config/Code/User"
@@ -131,27 +176,26 @@ if [ -f "$BACKUP_DIR/.config/Code/User/keybindings.json" ]; then
     ln -sf "$BACKUP_DIR/.config/Code/User/keybindings.json" "$HOME/.config/Code/User/keybindings.json"
 fi
 
-echo "Part 2 complete!"
 
 # ==========================================
-# 5. SYSTEM FILES (REQUIRES SUDO)
+# 6. SYSTEM FILES (REQUIRES SUDO)
 # ==========================================
 echo "Restoring system files (TLP & SDDM)... You will be prompted for your password."
 
 # TLP Power Management
 if [ -f "$BACKUP_DIR/tlp.conf" ]; then
     echo "Copying TLP config (avoiding symlink race conditions)..."
-    
-    # Use cp instead of ln to put a physical file on the root partition
+
+	# Use cp instead of ln to put a physical file on the root partition
     sudo cp "$BACKUP_DIR/tlp.conf" /etc/tlp.conf
-    
-    # Automatically uncomment the enable flag
+
+	# Automatically uncomment the enable flag
     sudo sed -i 's/^#TLP_ENABLE=1/TLP_ENABLE=1/' /etc/tlp.conf
-    
-    # Ensure the systemd radio override is masked
+
+	# Ensure the systemd radio override is masked
     sudo systemctl mask systemd-rfkill.service systemd-rfkill.socket
-    
-    # Enable the service to start on boot
+
+	# Enable the service to start on boot
     sudo systemctl enable tlp.service
 fi
 
@@ -159,17 +203,17 @@ fi
 if [ -d "$BACKUP_DIR/sddm-backup" ]; then
     echo "Restoring SDDM & Sugar-Candy theme files..."
     
-    # 1. Restore main SDDM config
+	# Restore main SDDM config
     if [ -f "$BACKUP_DIR/sddm-backup/sddm.conf" ]; then
         sudo cp "$BACKUP_DIR/sddm-backup/sddm.conf" /etc/sddm.conf
     fi
     
-    # 2. Restore Sugar-Candy theme configurations
-    if [ -f "$BACKUP_DIR/sddm-backup/theme.conf" ]; then
+    # Restore Sugar-Candy theme configurations
+	if [ -f "$BACKUP_DIR/sddm-backup/theme.conf" ]; then
         sudo cp "$BACKUP_DIR/sddm-backup/theme.conf" /usr/share/sddm/themes/sugar-candy/theme.conf
     fi
     
-    # 3. Restore custom background images (copies any jpg or png in the backup folder)
+	# Restore custom background images (copies any jpg or png in the backup folder)
     sudo cp "$BACKUP_DIR/sddm-backup/"*.jpg /usr/share/sddm/themes/sugar-candy/ 2>/dev/null
     sudo cp "$BACKUP_DIR/sddm-backup/"*.png /usr/share/sddm/themes/sugar-candy/ 2>/dev/null
 fi
@@ -184,4 +228,5 @@ fi
 
 echo "=========================================="
 echo "Restore Script Complete! Your environment is ready."
+echo "Note: You will need to log out and log back or reboot the system for everything to take effect."
 echo "=========================================="
