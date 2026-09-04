@@ -149,6 +149,7 @@ setopt HIST_IGNORE_SPACE
 # Default Editor- neovim
 export EDITOR="nvim"
 export VISUAL="nvim"
+export _JAVA_AWT_WM_NONREPARENTING=1
 
 # 1. SAFETY NETS (Prevent accidental deletions)
 alias rm='rm -i'
@@ -213,3 +214,6 @@ function sync-dotfiles() {
     echo "✅ Done! Dotfiles secured."
 }
 export PATH="$HOME/.local/bin:$PATH"
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools

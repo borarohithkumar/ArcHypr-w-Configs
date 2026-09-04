@@ -39,48 +39,61 @@ require("lazy").setup({
 
   -- Treesitter (Cross-Platform Safe)
   { 
-	"nvim-treesitter/nvim-treesitter", 
+    "nvim-treesitter/nvim-treesitter", 
     branch = "main", 
     lazy = false,
     build = ":TSUpdate",
     config = function()
-      -- 1. Install your required parsers (This is safe/fast and skips if already installed)
       require("nvim-treesitter").install({ 
         "lua",
         "vim",
         "javascript",
         "typescript",
-		"jsx",
+        "jsx",
         "tsx",
         "html",
         "css",
-		"tailwindcss",
         "python",
-        "markdown"
+        "markdown",
+        "java"
       })
 
-      -- 2. The new v0.11 way to automatically start highlighting
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "*",
         callback = function(args)
-          -- Gracefully start treesitter highlighting
           pcall(vim.treesitter.start, args.buf)
         end,
       })
     end
   },
 
-  -- Native LSP (MERN & Python Focus)
+  -- Native LSP (MERN, Python, & Java Focus)
   {
     "neovim/nvim-lspconfig",
     dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim", "hrsh7th/cmp-nvim-lsp" },
     config = function()
       require("mason").setup()
       require("mason-lspconfig").setup({ 
-        ensure_installed = { "pyright", "ts_ls", "html", "cssls", "tailwindcss" },
+        ensure_installed = { "pyright", "ts_ls", "html", "cssls", "tailwindcss", "jdtls", "lua_ls" },
         automatic_enable = true, 
       })
-      vim.lsp.enable({ "pyright", "ts_ls", "html", "cssls", "lua_ls", "tailwindcss" })
+
+      vim.lsp.config("lua_ls", {
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { "vim" },
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+          },
+        },
+      })
+
+      vim.lsp.enable({ "pyright", "ts_ls", "html", "cssls", "lua_ls", "tailwindcss", "jdtls" })
     end
   },
 
@@ -100,6 +113,7 @@ require("lazy").setup({
           css = { "prettier" },
           html = { "prettier" },
           json = { "prettier" },
+          java = { "google-java-format" },
         },
       })
     end,
@@ -176,13 +190,13 @@ key('n', '<leader>fg', builtin.live_grep, {})
 
 -- Formatting Keybind
 key({ 'n', 'v' }, '<leader>f', function()
-  require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 500 })
+  require("conform").format({ lsp_fallback = true, async = false, timeout_ms = 1000 })
 end, { desc = "Format file or range" })
 
 -- LSP Power Moves
 key('n', '<leader>rn', vim.lsp.buf.rename, { desc = 'Rename variable' })
-key('n', ']d', vim.diagnostic.goto_next, { desc = 'Next Error' })
-key('n', '[d', vim.diagnostic.goto_prev, { desc = 'Prev Error' })
+key("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next Diagnostic" })
+key("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Prev Diagnostic" })
 key('n', 'gd', vim.lsp.buf.definition, {})
 key('n', 'K', vim.lsp.buf.hover, {})
 
