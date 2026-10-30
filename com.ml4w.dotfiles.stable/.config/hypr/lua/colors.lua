@@ -1,5 +1,5 @@
 -- =============================================================================
--- PALETTE & ACCENT COLORS (Material-3 Glass Theme)
+-- PALETTE & ACCENT COLORS (Auto-Synced with Matugen colors.conf)
 -- =============================================================================
 
 local colors = {
@@ -47,7 +47,6 @@ local colors = {
     surface_container_highest = "rgba(303638ff)",
     surface_container_low     = "rgba(171c1eff)",
     surface_container_lowest  = "rgba(090f11ff)",
-    surface_dim               = "rgba(0f1416ff)",
     surface_tint              = "rgba(86d1e9ff)",
     surface_variant           = "rgba(40484bff)",
     tertiary                  = "rgba(c1c4ebff)",
@@ -55,5 +54,17 @@ local colors = {
     tertiary_fixed            = "rgba(dfe0ffff)",
     tertiary_fixed_dim        = "rgba(c1c4ebff)",
 }
+
+-- Dynamically override with live Matugen colors from ~/.config/hypr/colors.conf
+local f = io.open(os.getenv("HOME") .. "/.config/hypr/colors.conf", "r")
+if f then
+    for line in f:lines() do
+        local k, v = line:match("^%$([%w_]+)%s*=%s*(rgba%b())")
+        if k and v then
+            colors[k] = v
+        end
+    end
+    f:close()
+end
 
 return colors

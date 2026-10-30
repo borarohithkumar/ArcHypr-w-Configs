@@ -2,6 +2,7 @@
 -- APPEARANCE, LAYOUTS & MISC CONFIGURATION
 -- =============================================================================
 
+package.loaded["colors"] = nil
 local colors = require("colors")
 
 hl.config({

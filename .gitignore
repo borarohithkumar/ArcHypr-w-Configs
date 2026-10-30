@@ -9,3 +9,7 @@ lazy-lock.json
 **/*.tfstate.backup
 **/*.tfvars
 **/.terraform.lock.hcl
+
+# Auto-generated runtime state files (Waypaper & Matugen)
+com.ml4w.dotfiles.stable/.config/waypaper/config.ini
+com.ml4w.dotfiles.stable/.config/hypr/colors.conf

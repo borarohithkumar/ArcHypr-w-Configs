@@ -17,6 +17,7 @@ hl.bind(mainMod .. " + E",        hl.dsp.exec_cmd(ml4w_set .. "/filemanager.sh")
 hl.bind(mainMod .. " + period",   hl.dsp.exec_cmd(ml4w_set .. "/emojipicker.sh"))
 hl.bind(mainMod .. " + CTRL + C", hl.dsp.exec_cmd(ml4w_set .. "/calculator.sh"))
 hl.bind(mainMod .. " + SUPER_L",  hl.dsp.exec_cmd(hypr_scripts .. "/launcher.sh"), { release = true })
+hl.bind(mainMod .. " + CTRL + RETURN", hl.dsp.exec_cmd(hypr_scripts .. "/launcher.sh"))
 
 -- -----------------------------------------------------------------------------
 -- 2. Window Management & Tiling Controls
@@ -76,7 +77,7 @@ end)
 -- 3. System Utilities & ML4W Actions
 -- -----------------------------------------------------------------------------
 hl.bind(mainMod .. " + CTRL + R",  hl.dsp.exec_cmd("hyprctl reload"))
-hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(hypr_scripts .. "/toggle-animations.sh"))
+hl.bind(mainMod .. " + SHIFT + A", function() local cur = hl.get_config("animations.enabled"); hl.config({ animations = { enabled = not cur } }); hl.exec_cmd("notify-send -u low -t 1500 'Animations' 'Toggled: " .. tostring(not cur) .. "'") end)
 hl.bind(mainMod .. " + ALT + A",   hl.dsp.exec_cmd(hypr_scripts .. "/text-extractor.sh"))
 hl.bind(mainMod .. " + CTRL + Q",  hl.dsp.exec_cmd(ml4w_scripts .. "/wlogout.sh"))
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(hypr_scripts .. "/waypaper.sh --random"))
