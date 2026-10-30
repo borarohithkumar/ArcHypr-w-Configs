@@ -26,7 +26,7 @@ hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.exec_cmd("hyprctl activewindow | grep 
 hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
 hl.bind(mainMod .. " + M",         hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
 hl.bind(mainMod .. " + T",         hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("hyprctl dispatch workspaceopt allfloat"))
+hl.bind(mainMod .. " + SHIFT + T", function() local ws = hl.get_active_workspace(); if ws then for _, w in ipairs(ws:get_windows()) do hl.dispatch(hl.dsp.window.float({ window = w, action = "toggle" })) end end end)
 hl.bind(mainMod .. " + J",         hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + K",         hl.dsp.layout("swapsplit"))
 hl.bind(mainMod .. " + G",         hl.dsp.group.toggle())
@@ -114,7 +114,7 @@ for i = 1, 10 do
     local key = i % 10
     hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }))
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
-    hl.bind(mainMod .. " + CTRL + " .. key,  hl.dsp.exec_cmd(hypr_scripts .. "/moveTo.sh " .. i))
+    hl.bind(mainMod .. " + CTRL + " .. key, function() local ws = hl.get_active_workspace(); if ws then for _, w in ipairs(ws:get_windows()) do hl.dispatch(hl.dsp.window.move({ window = w, workspace = i, silent = true })) end end; hl.dispatch(hl.dsp.focus({ workspace = i })) end)
 end
 
 hl.bind(mainMod .. " + Tab",         hl.dsp.focus({ workspace = "m+1" }))

@@ -323,13 +323,14 @@ margin-right: 12px;
 }
 
 #network.disconnected{
+    font-size:14px;
     margin:0px;
     padding:0px;
 }
 
 #network.disabled{
     opacity:0.8;
-    font-size:18px;
+    font-size:14px;
     margin:0px 11px 0px 3px;
 }
 
